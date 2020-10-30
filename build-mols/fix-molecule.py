@@ -21,7 +21,7 @@ for bond in mol_ff.bonds:
     reqs.append(bond.type.req)
     
 
-# Modify one of the C-C bond lengths to make the changes larger
+# Modify one of the bond lengths to make the changes larger
 reqs[2] = 2.0
 
 #######################################
