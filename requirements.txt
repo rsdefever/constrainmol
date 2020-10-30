@@ -1,0 +1,9 @@
+foyer
+mbuild
+pyomo
+pyomo.extras
+coincbc
+ipopt
+jupyter
+pandas
+numpy
