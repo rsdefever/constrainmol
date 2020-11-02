@@ -100,9 +100,14 @@ class ConstrainMol(object):
         )
 
         # Create bond length parameter
-        m.bond_lengths = pyo.Param(m.atom_ids, m.atom_ids, initialize=constraints)
+        m.bond_lengths = pyo.Param(
+            m.atom_ids, m.atom_ids, initialize=constraints
+        )
 
-        m.eq_calc_bound_length = pyo.Constraint(m.atom_ids, m.atom_ids, rule=self._calc_bond_length)
+        # Add bond length constraints
+        m.eq_calc_bound_length = pyo.Constraint(
+            m.atom_ids, m.atom_ids, rule=self._calc_bond_length
+        )
 
         m.obj = pyo.Objective(
             expr=sum(
@@ -133,7 +138,9 @@ class ConstrainMol(object):
         Updates the structure.coordinates if solve is successful
         """
         result = pyo.SolverFactory('ipopt').solve(self.model, tee=True)
-        success = str(result["Solver"][0]["Termination condition"]) == 'optimal'
+        success = (
+                str(result["Solver"][0]["Termination condition"]) == 'optimal'
+        )
         if not success:
             raise ValueError("Optimal solution not found.")
         constrained_xyz = np.zeros((len(self.model.atom_ids), 3))
