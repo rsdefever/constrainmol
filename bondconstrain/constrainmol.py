@@ -133,17 +133,28 @@ class ConstrainMol(object):
         else:
             return pyo.Constraint.Skip
 
-    def solve(self):
+    def solve(self, verbose=False):
         """Solve the pyomo model to find the constrained coordinates
 
-        Updates the structure.coordinates if solve is successful
+        Parameters
+        ----------
+        verbose : boolean, optional, default=False
+            print the solver output to screen
+
+        Notes
+        -----
+        Updates ConstroinMol.structure.coordinates if solve is successful
+        and sets ConstrainMol.model_solved to True
         """
-        result = pyo.SolverFactory('ipopt').solve(self.model, tee=True)
+        result = pyo.SolverFactory('ipopt').solve(self.model, tee=verbose)
         success = (
                 str(result["Solver"][0]["Termination condition"]) == 'optimal'
         )
         if not success:
-            raise ValueError("Optimal solution not found.")
+            raise ValueError(
+                "Optimal solution not found. You may want to run "
+                "'solve' with 'verbose=True' to see the solver output."
+            )
         constrained_xyz = np.zeros((len(self.model.atom_ids), 3))
         for idx in self.model.atom_ids:
             constrained_xyz[idx, 0] = self.model.x[idx].value
