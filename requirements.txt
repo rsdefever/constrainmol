@@ -1,9 +1,8 @@
+numpy
+parmed
 foyer
 mbuild
+pytest
 pyomo
-pyomo.extras
-coincbc
 ipopt
 jupyter
-pandas
-numpy
