@@ -11,7 +11,7 @@ setup(
     license="MIT",
     author="Ryan S. DeFever",
     author_email="rdefever@nd.edu",
-    url="https://github.com/rsdefever/charges",
+    url="https://github.com/rsdefever/bondconstrain",
     install_requires=requirements,
     python_requires=">=3.6, <4",
     include_package_data=True,
