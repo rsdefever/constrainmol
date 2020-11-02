@@ -38,6 +38,7 @@ class ConstrainMol(object):
 
         self.structure = deepcopy(structure)
         self.model = self._create_model(xyz, constraints)
+        self.model_solved = False
 
     def _create_model(self, xyz, constraints):
         """Create a pyomo model to make xyz satisfy bond constraints
@@ -150,6 +151,7 @@ class ConstrainMol(object):
             constrained_xyz[idx, 2] = self.model.z[idx].value
 
         self.structure.coordinates = constrained_xyz
+        self.model_solved = True
 
     def update_xyz(self, xyz):
         """
@@ -183,3 +185,5 @@ class ConstrainMol(object):
             self.model.x[idx] = xyz[idx, 0]
             self.model.y[idx] = xyz[idx, 1]
             self.model.z[idx] = xyz[idx, 2]
+
+        self.model_solved = False

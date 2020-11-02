@@ -29,6 +29,10 @@ class TestConstrainMol(BaseTest):
         constrain_mol = ConstrainMol(ethane_ua)
         assert isinstance(constrain_mol.model, pyo.ConcreteModel)
 
+    def test_model_solved(self, ethane_ua):
+        constrain_mol = ConstrainMol(ethane_ua)
+        assert constrain_mol.model_solved is False
+
     def test_model_xyz(self, ethane_ua):
         constrain_mol = ConstrainMol(ethane_ua)
         assert np.allclose(constrain_mol.model.x_start[0].value, ethane_ua.coordinates[0, 0])
@@ -63,6 +67,7 @@ class TestConstrainMol(BaseTest):
         assert np.allclose(constrain_mol.model.y[1].value, ethane_ua.coordinates[1, 1])
         assert np.allclose(constrain_mol.model.z[0].value, ethane_ua.coordinates[0, 2])
         assert np.allclose(constrain_mol.model.z[1].value, ethane_ua.coordinates[1, 2])
+        assert constrain_mol.model_solved is True
 
     def test_invalid_update(self, ethane_ua):
         constrain_mol = ConstrainMol(ethane_ua)
@@ -94,9 +99,12 @@ class TestConstrainMol(BaseTest):
     def test_resolve_model(self, propane_ua):
         constrain_mol = ConstrainMol(propane_ua)
         constrain_mol.solve()
+        assert constrain_mol.model_solved is True
         propane_solved = deepcopy(constrain_mol.structure)
         constrain_mol.update_xyz(propane_ua.coordinates)
+        assert constrain_mol.model_solved is False
         constrain_mol.solve()
+        assert constrain_mol.model_solved is True
         assert np.allclose(propane_solved.coordinates, constrain_mol.structure.coordinates)
 
     def test_dimethylether(self, dimehtylether_oplsaa):
