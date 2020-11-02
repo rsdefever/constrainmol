@@ -120,3 +120,17 @@ class TestConstrainMol(BaseTest):
             idx2 = bond.atom2.idx
             dist = np.sqrt(np.sum((xyz[idx2] - xyz[idx1])**2))
             assert np.allclose(dist, bond.type.req)
+
+    def test_box_diethylether(self, diethylether_box):
+        (dee_ff, box) = diethylether_box
+        constrain_mol = ConstrainMol(dee_ff)
+        for mol in box.children:
+            constrain_mol.update_xyz(mol.xyz * 10)  # nm to angstrom
+            constrain_mol.solve()
+            optimized = constrain_mol.structure
+            xyz = optimized.coordinates
+            for bond in optimized.bonds:
+                idx1 = bond.atom1.idx
+                idx2 = bond.atom2.idx
+                dist = np.sqrt(np.sum((xyz[idx2] - xyz[idx1])**2))
+                assert np.allclose(dist, bond.type.req)

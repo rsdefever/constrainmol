@@ -58,3 +58,11 @@ class BaseTest:
         benzene = mbuild.load("c1ccccc1", smiles=True)
         benzene = ff.apply(benzene)
         return benzene
+
+    @pytest.fixture
+    def diethylether_box(self):
+        ff = foyer.forcefields.load_OPLSAA()
+        dee = mbuild.load("CCOCC", smiles=True)
+        dee_ff = ff.apply(dee)
+        box = mbuild.fill_box(dee, 500, density=600)
+        return dee_ff, box
