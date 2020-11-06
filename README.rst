@@ -5,7 +5,7 @@ constrainmol
 |CodeCov|
 |Azure|
 
-.. |Codecov| image:: https://codecov.io/gh/rsdefever/constrainmol/branch/master/graph/badge.svg
+.. |Codecov| image:: https://codecov.io/gh/rsdefever/constrainmol/branch/main/graph/badge.svg?token=H7BBUYGNTU
 .. |Azure| image:: https://dev.azure.com/rdefever/constrainmol/_apis/build/status/rsdefever.constrainmol?branchName=main
 .. |License| image:: https://img.shields.io/github/license/rsdefever/constrainmol
 
