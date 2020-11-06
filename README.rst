@@ -74,7 +74,7 @@ If you want to test your installation you can replace the final two steps above 
 
     conda create --name constrain --file requirements-dev.txt -c conda-forge -c mosdef -c omnia
     pip install .
-    pytest bondconstrain/tests
+    pytest constrainmol/tests
 
 
 Credits
