@@ -6,7 +6,7 @@ constrainmol
 |Azure|
 
 .. |Codecov| image:: https://codecov.io/gh/rsdefever/constrainmol/branch/master/graph/badge.svg
-.. |Azure| image:: https://dev.azure.com/rdefever/constrainmol/_apis/build/status/rsdefever.ele?branchName=master
+.. |Azure| image:: https://dev.azure.com/rdefever/constrainmol/_apis/build/status/rsdefever.constrainmol?branchName=main
 .. |License| image:: https://img.shields.io/github/license/rsdefever/constrainmol
 
 Overview
