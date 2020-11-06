@@ -4,7 +4,7 @@ import numpy as np
 from copy import deepcopy
 
 
-class ConstrainMol(object):
+class ConstrainedMolecule(object):
 
     def __init__(self, structure):
         """Initialize the ConstrainedMolecule from a parmed.Structure
@@ -143,8 +143,8 @@ class ConstrainMol(object):
 
         Notes
         -----
-        Updates ConstroinMol.structure.coordinates if solve is successful
-        and sets ConstrainMol.model_solved to True
+        Updates ConstrainedMolecule.structure.coordinates if solve is successful
+        and sets ConstrainMolecule.model_solved to True
         """
         result = pyo.SolverFactory('ipopt').solve(self.model, tee=verbose)
         success = (
@@ -198,3 +198,14 @@ class ConstrainMol(object):
             self.model.z[idx] = xyz[idx, 2]
 
         self.model_solved = False
+
+    @property
+    def xyz(self):
+        return self.structure.coordinates
+
+    @xyz.setter
+    def xyz(self, xyz):
+        raise ValueError(
+            "Coordinates must be updated with ConstrainedMolecule.update_xyz. "
+            "See help(ConstrainedMolecule.update_xyz) for more information."
+        )

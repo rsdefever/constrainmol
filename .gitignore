@@ -1,3 +1,8 @@
 .ipynb_checkpoints
-.gro
-.pdb
+*.gro
+*.pdb
+__pycache__
+*ipynb
+*egg-info
+.DS_Store
+.idea

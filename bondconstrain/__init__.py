@@ -1,1 +1,1 @@
-from .constrainmol import ConstrainMol
+from .bondconstrain import ConstrainedMolecule

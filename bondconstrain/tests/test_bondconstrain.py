@@ -5,36 +5,36 @@ import numpy as np
 
 from copy import deepcopy
 from bondconstrain.tests.base_test import BaseTest
-from bondconstrain.constrainmol import ConstrainMol
+from bondconstrain import ConstrainedMolecule
 
 
-class TestConstrainMol(BaseTest):
+class TestConstrainedMolecule(BaseTest):
     def test_invalid_init(self):
         with pytest.raises(TypeError):
-            ConstrainMol("structure")
+            ConstrainedMolecule("structure")
 
     def test_no_bonds(self):
         with pytest.raises(ValueError):
-            ConstrainMol(parmed.Structure())
+            ConstrainedMolecule(parmed.Structure())
 
     def test_copy_coordinates(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         assert np.allclose(constrain_mol.structure.coordinates, ethane_ua.coordinates)
 
     def test_copy_bonds(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         assert len(constrain_mol.structure.bonds) == len(ethane_ua.bonds)
 
     def test_create_model(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         assert isinstance(constrain_mol.model, pyo.ConcreteModel)
 
     def test_model_solved(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         assert constrain_mol.model_solved is False
 
     def test_model_xyz(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         assert np.allclose(constrain_mol.model.x_start[0].value, ethane_ua.coordinates[0, 0])
         assert np.allclose(constrain_mol.model.x_start[1].value, ethane_ua.coordinates[1, 0])
         assert np.allclose(constrain_mol.model.y_start[0].value, ethane_ua.coordinates[0, 1])
@@ -49,11 +49,11 @@ class TestConstrainMol(BaseTest):
         assert np.allclose(constrain_mol.model.z[1].value, ethane_ua.coordinates[1, 2])
 
     def test_model_constraints(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         assert np.allclose(constrain_mol.model.bond_lengths[(0, 1)], ethane_ua.bonds[0].type.req)
 
     def test_solved_model(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         constrain_mol.solve()
         assert np.allclose(constrain_mol.model.x_start[0].value, ethane_ua.coordinates[0, 0])
         assert np.allclose(constrain_mol.model.x_start[1].value, ethane_ua.coordinates[1, 0])
@@ -70,14 +70,14 @@ class TestConstrainMol(BaseTest):
         assert constrain_mol.model_solved is True
 
     def test_invalid_update(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         with pytest.raises(TypeError):
             constrain_mol.update_xyz("string")
         with pytest.raises(ValueError):
             constrain_mol.update_xyz([[1.0, 1.0, 1.0]])
 
     def test_update_xyz(self, ethane_ua):
-        constrain_mol = ConstrainMol(ethane_ua)
+        constrain_mol = ConstrainedMolecule(ethane_ua)
         ethane_ua.coordinates[0, 0] = -1.0
         ethane_ua.coordinates[0, 1] = -0.3
         ethane_ua.coordinates[0, 2] = 0.2
@@ -97,7 +97,7 @@ class TestConstrainMol(BaseTest):
         assert np.allclose(constrain_mol.model.z[1].value, ethane_ua.coordinates[1, 2])
 
     def test_resolve_model(self, propane_ua):
-        constrain_mol = ConstrainMol(propane_ua)
+        constrain_mol = ConstrainedMolecule(propane_ua)
         constrain_mol.solve()
         assert constrain_mol.model_solved is True
         propane_solved = deepcopy(constrain_mol.structure)
@@ -108,7 +108,7 @@ class TestConstrainMol(BaseTest):
         assert np.allclose(propane_solved.coordinates, constrain_mol.structure.coordinates)
 
     def test_dimethylether(self, dimehtylether_oplsaa):
-        constrain_mol = ConstrainMol(dimehtylether_oplsaa)
+        constrain_mol = ConstrainedMolecule(dimehtylether_oplsaa)
         constrain_mol.solve()
         optimized = constrain_mol.structure
         xyz = optimized.coordinates
@@ -119,7 +119,7 @@ class TestConstrainMol(BaseTest):
             assert np.allclose(dist, bond.type.req)
 
     def test_benzene(self, benzene_oplsaa):
-        constrain_mol = ConstrainMol(benzene_oplsaa)
+        constrain_mol = ConstrainedMolecule(benzene_oplsaa)
         constrain_mol.solve()
         optimized = constrain_mol.structure
         xyz = optimized.coordinates
@@ -131,7 +131,7 @@ class TestConstrainMol(BaseTest):
 
     def test_box_diethylether(self, diethylether_box):
         (dee_ff, box) = diethylether_box
-        constrain_mol = ConstrainMol(dee_ff)
+        constrain_mol = ConstrainedMolecule(dee_ff)
         for mol in box.children:
             constrain_mol.update_xyz(mol.xyz * 10)  # nm to angstrom
             constrain_mol.solve()
@@ -142,3 +142,13 @@ class TestConstrainMol(BaseTest):
                 idx2 = bond.atom2.idx
                 dist = np.sqrt(np.sum((xyz[idx2] - xyz[idx1])**2))
                 assert np.allclose(dist, bond.type.req)
+
+    def test_xyz_getter(self, benzene_oplsaa):
+        mol = ConstrainedMolecule(benzene_oplsaa)
+        assert np.allclose(mol.xyz, benzene_oplsaa.coordinates)
+
+    def test_xyz_setter(self, benzene_oplsaa):
+        mol = ConstrainedMolecule(benzene_oplsaa)
+        new_xyz = np.zeros(benzene_oplsaa.coordinates.shape)
+        with pytest.raises(ValueError):
+            mol.xyz = new_xyz

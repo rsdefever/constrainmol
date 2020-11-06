@@ -64,5 +64,5 @@ class BaseTest:
         ff = foyer.forcefields.load_OPLSAA()
         dee = mbuild.load("CCOCC", smiles=True)
         dee_ff = ff.apply(dee)
-        box = mbuild.fill_box(dee, 500, density=600)
+        box = mbuild.fill_box(dee, 50, density=600)
         return dee_ff, box
