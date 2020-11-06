@@ -1,6 +1,6 @@
 import mbuild
 import foyer
-import bondconstrain
+from constrainmol import ConstrainedMolecule
 
 
 ff = foyer.forcefields.load_OPLSAA()
@@ -9,7 +9,7 @@ dee_ff = ff.apply(dee)
 box = mbuild.fill_box(dee, 500, density=600)
 box.save("unconstrained.pdb", overwrite=True)
 
-constrain_mol = bondconstrain.ConstrainedMolecule(dee_ff)
+constrain_mol = ConstrainedMolecule(dee_ff)
 for mol in box.children:
     constrain_mol.update_xyz(mol.xyz * 10)  # nm to angstrom
     constrain_mol.solve()

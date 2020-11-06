@@ -4,8 +4,8 @@ import pyomo.environ as pyo
 import numpy as np
 
 from copy import deepcopy
-from bondconstrain.tests.base_test import BaseTest
-from bondconstrain import ConstrainedMolecule
+from constrainmol.tests.base_test import BaseTest
+from constrainmol import ConstrainedMolecule
 
 
 class TestConstrainedMolecule(BaseTest):
