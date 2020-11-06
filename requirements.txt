@@ -1,8 +1,4 @@
 numpy
 parmed
-foyer
-mbuild
-pytest
 pyomo
 ipopt
-jupyter

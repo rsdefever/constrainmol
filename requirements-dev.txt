@@ -1,0 +1,9 @@
+numpy
+parmed
+foyer
+mbuild
+pyomo
+ipopt
+pytest
+pytest-cov
+codecov
