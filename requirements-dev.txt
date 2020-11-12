@@ -7,3 +7,4 @@ ipopt
 pytest
 pytest-cov
 codecov
+bump2version
