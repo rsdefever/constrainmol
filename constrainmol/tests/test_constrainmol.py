@@ -3,7 +3,6 @@ import parmed
 import pyomo.environ as pyo
 import numpy as np
 
-from copy import deepcopy
 from constrainmol.tests.base_test import BaseTest
 from constrainmol import ConstrainedMolecule
 
@@ -100,7 +99,7 @@ class TestConstrainedMolecule(BaseTest):
         constrain_mol = ConstrainedMolecule(propane_ua)
         constrain_mol.solve()
         assert constrain_mol.model_solved is True
-        propane_solved = deepcopy(constrain_mol.structure)
+        propane_solved = parmed.structure.copy(constrain_mol.structure)
         constrain_mol.update_xyz(propane_ua.coordinates)
         assert constrain_mol.model_solved is False
         constrain_mol.solve()

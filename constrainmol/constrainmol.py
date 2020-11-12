@@ -1,7 +1,6 @@
 import pyomo.environ as pyo
 import parmed
 import numpy as np
-from copy import deepcopy
 
 
 class ConstrainedMolecule(object):
@@ -36,7 +35,7 @@ class ConstrainedMolecule(object):
             idx2 = bond.atom2.idx
             constraints[(idx1, idx2)] = bond.type.req
 
-        self.structure = deepcopy(structure)
+        self.structure = parmed.structure.copy(structure)
         self.model = self._create_model(xyz, constraints)
         self.model_solved = False
 
