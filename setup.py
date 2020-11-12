@@ -1,6 +1,10 @@
 from setuptools import setup, find_packages
 
-requirements = []
+requirements = [
+    "numpy",
+    "parmed",
+    "pyomo",
+]
 
 __version__ = "0.0.0"
 
