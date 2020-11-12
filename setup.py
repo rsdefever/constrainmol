@@ -6,7 +6,7 @@ requirements = [
     "pyomo",
 ]
 
-__version__ = "0.0.0"
+__version__ = "0.1.0"
 
 setup(
     name="constrainmol",
