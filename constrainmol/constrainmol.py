@@ -5,7 +5,7 @@ import numpy as np
 
 class ConstrainedMolecule(object):
 
-    def __init__(self, structure):
+    def __init__(self, structure, constrain_angles=False):
         """Initialize the ConstrainedMolecule from a parmed.Structure
 
         Parameters
@@ -27,27 +27,43 @@ class ConstrainedMolecule(object):
                 f"structure: {structure} contains no bonds"
             )
 
-        # Extract coordinates and bonds
+        # Extract coordinates
         xyz = structure.coordinates
-        constraints = {}
+
+        # Extract bond constraints
+        bond_constraints = {}
         for bond in structure.bonds:
             idx1 = bond.atom1.idx
             idx2 = bond.atom2.idx
-            constraints[(idx1, idx2)] = bond.type.req
+            bond_constraints[(idx1, idx2)] = bond.type.req
 
+        # Extract angle constraints if desired
+        if constrain_angles:
+            angle_constraints = {}
+            for angle in structure.angles:
+                idx1 = angle.atom1.idx
+                idx2 = angle.atom2.idx
+                idx3 = angle.atom3.idx
+                angle_constraints[(idx1, idx2, idx3)] = angle.type.theteq
+        else:
+            angle_constraints = None
+
+        # Copy the pmd.structure
         self.structure = parmed.structure.copy(structure)
-        self.model = self._create_model(xyz, constraints)
+        self.model = self._create_model(xyz, bond_constraints, angle_constraints)
         self.model_solved = False
 
-    def _create_model(self, xyz, constraints):
-        """Create a pyomo model to make xyz satisfy bond constraints
+    def _create_model(self, xyz, bond_constraints, angle_constraints):
+        """Create a pyomo model to make xyz satisfy bond and angle constraints
 
         Parameters
         ----------
         xyz: np.ndarray, shape=(n_atoms, 3)
             initial xyz coordinates
-        constraints: dict, keys=(idx1, idx2), values=bond length
+        bond_constraints: dict, keys=(idx1, idx2), values=bond length
             dictionary with bond length constraints
+        angle_constraints: dict, keys=(idx1, idx2, idx2), values=angle
+            dictionary with bond angle constraints
 
         Returns
         -------
@@ -58,7 +74,7 @@ class ConstrainedMolecule(object):
         # Create pyomo model
         m = pyo.ConcreteModel()
 
-        # Create list of atom indicies
+        # Create list of atom indices
         ids = range(xyz.shape[0])
         m.atom_ids = pyo.Set(initialize=ids)
 
@@ -101,13 +117,21 @@ class ConstrainedMolecule(object):
 
         # Create bond length parameter
         m.bond_lengths = pyo.Param(
-            m.atom_ids, m.atom_ids, initialize=constraints
+            m.atom_ids, m.atom_ids, initialize=bond_constraints
         )
 
         # Add bond length constraints
-        m.eq_calc_bound_length = pyo.Constraint(
+        m.eq_calc_bond_length = pyo.Constraint(
             m.atom_ids, m.atom_ids, rule=self._calc_bond_length
         )
+
+        if angle_constraints is not None:
+            m.bond_angles = pyo.Param(
+                m.atom_ids, m.atom_ids, m.atom_ids, initialize=angle_constraints
+            )
+            m.eq_calc_angle = pyo.Constraint(
+                m.atom_ids, m.atom_ids, m.atom_ids, rule=self._calc_angle
+            )
 
         m.obj = pyo.Objective(
             expr=sum(
@@ -132,6 +156,31 @@ class ConstrainedMolecule(object):
         else:
             return pyo.Constraint.Skip
 
+    @staticmethod
+    def _calc_angle(m, i, j, k):
+        if (i, j, k) in m.bond_angles.keys():
+            ji = [
+                m.x[i] - m.x[j],
+                m.y[i] - m.y[j],
+                m.z[i] - m.z[j],
+            ]
+            jk = [
+                m.x[k] - m.x[j],
+                m.y[k] - m.y[j],
+                m.z[k] - m.z[j],
+            ]
+            norm_ji = pyo.sqrt(ji[0]**2 + ji[1]**2 + ji[2]**2)
+            norm_jk = pyo.sqrt(jk[0]**2 + jk[1]**2 + jk[2]**2)
+
+            dot = (
+                ji[0] * jk[0] + ji[1]*jk[1] + ji[2]*jk[2]
+            )
+            cos_angle = dot / (norm_ji * norm_jk)
+            angle = pyo.acos(cos_angle) * 180 / np.pi
+            return angle == m.bond_angles[(i, j, k)]
+        else:
+            return pyo.Constraint.Skip
+
     def solve(self, verbose=False):
         """Solve the pyomo model to find the constrained coordinates
 
@@ -150,10 +199,17 @@ class ConstrainedMolecule(object):
                 str(result["Solver"][0]["Termination condition"]) == 'optimal'
         )
         if not success:
-            raise ValueError(
-                "Optimal solution not found. You may want to run "
-                "'solve' with 'verbose=True' to see the solver output."
-            )
+            if not verbose:
+                raise ValueError(
+                    "Optimal solution not found. You may want to run "
+                    "'solve' with 'verbose=True' to see the solver output."
+                )
+            else:
+                raise ValueError(
+                    "Optimal solution not found. See the solver output "
+                    "for details."
+                )
+
         constrained_xyz = np.zeros((len(self.model.atom_ids), 3))
         for idx in self.model.atom_ids:
             constrained_xyz[idx, 0] = self.model.x[idx].value

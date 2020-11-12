@@ -33,9 +33,13 @@ class BaseTest:
         bond_type = parmed.topologyobjects.BondType(1.5, 1.5)
         b1 = parmed.topologyobjects.Bond(a1, a2, type=bond_type)
         b2 = parmed.topologyobjects.Bond(a2, a3, type=bond_type)
+        angle_type = parmed.topologyobjects.AngleType(1.0, 120)
+        ang1 = parmed.topologyobjects.Angle(a1, a2, a3, type=angle_type)
         propane.bonds.append(b1)
         propane.bonds.append(b2)
+        propane.angles.append(ang1)
         propane.bond_types.append(bond_type)
+        propane.angle_types.append(angle_type)
         propane.coordinates = np.array(
             [
                 [0.0, 0.1, 0.2],

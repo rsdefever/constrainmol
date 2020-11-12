@@ -47,9 +47,13 @@ class TestConstrainedMolecule(BaseTest):
         assert np.allclose(constrain_mol.model.z[0].value, ethane_ua.coordinates[0, 2])
         assert np.allclose(constrain_mol.model.z[1].value, ethane_ua.coordinates[1, 2])
 
-    def test_model_constraints(self, ethane_ua):
+    def test_model_bond_constraints(self, ethane_ua):
         constrain_mol = ConstrainedMolecule(ethane_ua)
         assert np.allclose(constrain_mol.model.bond_lengths[(0, 1)], ethane_ua.bonds[0].type.req)
+
+    def test_model_angle_constraints(self, propane_ua):
+        constrain_mol = ConstrainedMolecule(propane_ua, constrain_angles=True)
+        assert np.allclose(constrain_mol.model.bond_angles[(0, 1, 2)], propane_ua.angles[0].type.theteq)
 
     def test_solved_model(self, ethane_ua):
         constrain_mol = ConstrainedMolecule(ethane_ua)
@@ -106,6 +110,26 @@ class TestConstrainedMolecule(BaseTest):
         assert constrain_mol.model_solved is True
         assert np.allclose(propane_solved.coordinates, constrain_mol.structure.coordinates)
 
+    def test_propane_angles(self, propane_ua):
+        constrain_mol = ConstrainedMolecule(propane_ua, constrain_angles=True)
+        constrain_mol.solve(verbose=True)
+        optimized = constrain_mol.structure
+        xyz = optimized.coordinates
+        for bond in optimized.bonds:
+            idx1 = bond.atom1.idx
+            idx2 = bond.atom2.idx
+            dist = np.sqrt(np.sum((xyz[idx2] - xyz[idx1])**2))
+            assert np.allclose(dist, bond.type.req)
+        for angle in optimized.angles:
+            idx1 = angle.atom1.idx
+            idx2 = angle.atom2.idx
+            idx3 = angle.atom3.idx
+            ji = xyz[idx1] - xyz[idx2]
+            jk = xyz[idx3] - xyz[idx2]
+            cos_angle = np.dot(ji, jk) / (np.linalg.norm(ji) * np.linalg.norm(jk))
+            calc_angle = np.deg2rad(np.arccos(cos_angle))
+            assert np.allclose(calc_angle, angle.type.theteq)
+
     def test_dimethylether(self, dimehtylether_oplsaa):
         constrain_mol = ConstrainedMolecule(dimehtylether_oplsaa)
         constrain_mol.solve()
@@ -116,6 +140,25 @@ class TestConstrainedMolecule(BaseTest):
             idx2 = bond.atom2.idx
             dist = np.sqrt(np.sum((xyz[idx2] - xyz[idx1])**2))
             assert np.allclose(dist, bond.type.req)
+
+        constrain_mol = ConstrainedMolecule(dimehtylether_oplsaa, constrain_angles=True)
+        constrain_mol.solve(verbose=True)
+        optimized = constrain_mol.structure
+        xyz = optimized.coordinates
+        for bond in optimized.bonds:
+            idx1 = bond.atom1.idx
+            idx2 = bond.atom2.idx
+            dist = np.sqrt(np.sum((xyz[idx2] - xyz[idx1])**2))
+            assert np.allclose(dist, bond.type.req)
+        for angle in optimized.angles:
+            idx1 = angle.atom1.idx
+            idx2 = angle.atom2.idx
+            idx3 = angle.atom3.idx
+            ji = xyz[idx1] - xyz[idx2]
+            jk = xyz[idx3] - xyz[idx2]
+            cos_angle = np.dot(ji, jk) / (np.linalg.norm(ji) * np.linalg.norm(jk))
+            calc_angle = np.deg2rad(np.arccos(cos_angle))
+            assert np.allclose(calc_angle, angle.type.theteq)
 
     def test_benzene(self, benzene_oplsaa):
         constrain_mol = ConstrainedMolecule(benzene_oplsaa)
