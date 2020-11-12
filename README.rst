@@ -61,20 +61,32 @@ More examples are provided in the ``examples/`` directory of this repository.
 Installation
 ~~~~~~~~~~~~
 
-Installation from source is the only supported option at this time:
+A conda installation is available. To create a new conda environment
+(``constrain``) and install ``constrainmol`` into the environment, use:
+
+.. code-block:: bash
+
+    conda create --name constrain constrainmol -c conda-forge
+    conda activate constrain
+
+Installation from source is also supported:
 
 .. code-block:: bash
 
     git clone git@github.com/rsdefever/constrainmol.git
     cd constrainmol/
-    conda create --name constrain --file requirements.txt -c conda-forge -c mosdef -c omnia
+    conda create --name constrain --file requirements.txt -c conda-forge
+    conda activate constrain
     pip install .
 
-If you want to test your installation you can replace the final two steps above with the following:
+If you want to test your installation you can replace the steps above with the following:
 
 .. code-block:: bash
 
+    git clone git@github.com/rsdefever/constrainmol.git
+    cd constrainmol/
     conda create --name constrain --file requirements-dev.txt -c conda-forge -c mosdef -c omnia
+    conda activate constrain
     pip install .
     pytest constrainmol/tests
 
