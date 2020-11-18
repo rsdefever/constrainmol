@@ -4,6 +4,8 @@ import foyer
 import parmed
 import numpy as np
 
+from os.path import join, split, abspath
+
 
 class BaseTest:
 
@@ -51,7 +53,8 @@ class BaseTest:
 
     @pytest.fixture
     def water_spce(self):
-        ff = foyer.forcefields.load_OPLSAA()
+        ff_file = get_fn("spce.xml")
+        ff = foyer.Forcefield(ff_file)
         water = mbuild.load("O", smiles=True)
         water = ff.apply(water)
         return water
@@ -77,3 +80,19 @@ class BaseTest:
         dee_ff = ff.apply(dee)
         box = mbuild.fill_box(dee, 50, density=600)
         return dee_ff, box
+
+
+def get_fn(filename):
+    """Gets the full path of the file name for a particular test file.
+
+    Parameters
+    ----------
+    filename : str
+        name of the file to get
+
+    Returns
+    -------
+    path: str
+        path to the file
+    """
+    return join(split(abspath(__file__))[0], "files", filename)
