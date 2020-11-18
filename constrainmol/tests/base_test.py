@@ -50,6 +50,13 @@ class BaseTest:
         return propane
 
     @pytest.fixture
+    def water_spce(self):
+        ff = foyer.forcefields.load_OPLSAA()
+        water = mbuild.load("O", smiles=True)
+        water = ff.apply(water)
+        return water
+
+    @pytest.fixture
     def dimehtylether_oplsaa(self):
         ff = foyer.forcefields.load_OPLSAA()
         dme = mbuild.load("COC", smiles=True)

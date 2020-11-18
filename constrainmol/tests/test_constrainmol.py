@@ -127,7 +127,7 @@ class TestConstrainedMolecule(BaseTest):
             ji = xyz[idx1] - xyz[idx2]
             jk = xyz[idx3] - xyz[idx2]
             cos_angle = np.dot(ji, jk) / (np.linalg.norm(ji) * np.linalg.norm(jk))
-            calc_angle = np.deg2rad(np.arccos(cos_angle))
+            calc_angle = np.rad2deg(np.arccos(cos_angle))
             assert np.allclose(calc_angle, angle.type.theteq)
 
     def test_dimethylether(self, dimehtylether_oplsaa):
@@ -141,7 +141,13 @@ class TestConstrainedMolecule(BaseTest):
             dist = np.sqrt(np.sum((xyz[idx2] - xyz[idx1])**2))
             assert np.allclose(dist, bond.type.req)
 
-        constrain_mol = ConstrainedMolecule(dimehtylether_oplsaa, constrain_angles=True)
+        with pytest.raises(ValueError):
+            constrain_mol = ConstrainedMolecule(dimehtylether_oplsaa, constrain_angles=True)
+            constrain_mol.solve(verbose=True)
+
+    def test_spce_water(self, water_spce):
+
+        constrain_mol = ConstrainedMolecule(water_spce, constrain_angles=True)
         constrain_mol.solve(verbose=True)
         optimized = constrain_mol.structure
         xyz = optimized.coordinates
@@ -157,8 +163,9 @@ class TestConstrainedMolecule(BaseTest):
             ji = xyz[idx1] - xyz[idx2]
             jk = xyz[idx3] - xyz[idx2]
             cos_angle = np.dot(ji, jk) / (np.linalg.norm(ji) * np.linalg.norm(jk))
-            calc_angle = np.deg2rad(np.arccos(cos_angle))
+            calc_angle = np.rad2deg(np.arccos(cos_angle))
             assert np.allclose(calc_angle, angle.type.theteq)
+
 
     def test_benzene(self, benzene_oplsaa):
         constrain_mol = ConstrainedMolecule(benzene_oplsaa)
