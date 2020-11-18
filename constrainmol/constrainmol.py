@@ -1,6 +1,7 @@
 import pyomo.environ as pyo
 import parmed
 import numpy as np
+from warnings import warn
 
 
 class ConstrainedMolecule(object):
@@ -181,14 +182,15 @@ class ConstrainedMolecule(object):
         else:
             return pyo.Constraint.Skip
 
-    def solve(self, verbose=False):
+    def solve(self, verbose=False, ignore_errors=False):
         """Solve the pyomo model to find the constrained coordinates
 
         Parameters
         ----------
         verbose : boolean, optional, default=False
             print the solver output to screen
-
+        ignore_errors : boolean, optional, default=False
+            ignore solver errors and return
         Notes
         -----
         Updates ConstrainedMolecule.structure.coordinates if solve is successful
@@ -199,16 +201,23 @@ class ConstrainedMolecule(object):
                 str(result["Solver"][0]["Termination condition"]) == 'optimal'
         )
         if not success:
-            if not verbose:
-                raise ValueError(
-                    "Optimal solution not found. You may want to run "
-                    "'solve' with 'verbose=True' to see the solver output."
+            if ignore_errors:
+                warn(
+                    "Optimal solution not found. Your constraints may not "
+                    "be satisfied. Run 'solve' with 'verbose=True' "
+                    "to see the solver output."
                 )
             else:
-                raise ValueError(
-                    "Optimal solution not found. See the solver output "
-                    "for details."
-                )
+                if not verbose:
+                    raise ValueError(
+                        "Optimal solution not found. You may want to run "
+                        "'solve' with 'verbose=True' to see the solver output."
+                    )
+                else:
+                    raise ValueError(
+                        "Optimal solution not found. See the solver output "
+                        "for details."
+                    )
 
         constrained_xyz = np.zeros((len(self.model.atom_ids), 3))
         for idx in self.model.atom_ids:

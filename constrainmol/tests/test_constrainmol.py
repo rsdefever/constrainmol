@@ -145,6 +145,9 @@ class TestConstrainedMolecule(BaseTest):
             constrain_mol = ConstrainedMolecule(dimehtylether_oplsaa, constrain_angles=True)
             constrain_mol.solve(verbose=True)
 
+        constrain_mol = ConstrainedMolecule(dimehtylether_oplsaa, constrain_angles=True)
+        constrain_mol.solve(ignore_errors=True)
+
     def test_spce_water(self, water_spce):
 
         constrain_mol = ConstrainedMolecule(water_spce, constrain_angles=True)
