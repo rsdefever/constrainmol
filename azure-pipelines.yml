@@ -6,14 +6,14 @@ pr:
   autoCancel: true
   branches:
     include:
-      - master
+      - main
 
 schedules:
 - cron: "0 0 * * *"
   displayName: Daily midnight build for master
   branches:
     include:
-      - master
+      - main
 
 jobs:
 - job: Stable
